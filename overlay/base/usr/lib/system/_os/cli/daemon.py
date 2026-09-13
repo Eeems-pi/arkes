@@ -52,7 +52,7 @@ def command(args: Namespace) -> None:  # pyright:ignore [reportUnusedParameter]
     chronic("systemctl", "reload", "dbus")
     DBusGMainLoop(set_as_default=True)
     bus = dbus.SystemBus()
-    bus_name = cast(dbus.service.BusName, dbus.service.BusName("os.system", bus))
+    bus_name = dbus.service.BusName("os.system", bus)
     objects: list[dbus.service.Object] = []
     for file in iglob(os.path.join(os.path.dirname(__file__), "..", "daemon", "*.py")):
         if file.endswith("__.py"):
