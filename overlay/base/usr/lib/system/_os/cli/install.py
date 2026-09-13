@@ -257,14 +257,27 @@ def install(
             sbctl create-keys
             sbctl enroll-keys -m
             """,
-            sysroot=sysroot,
+        )
+        sbctl_path = os.path.join(sysroot, "var/lib/sbctl")
+        os.makedirs(sbctl_path, exist_ok=True)
+        execute(
+            "mount",
+            "--bind",
+            os.path.join(
+                sysroot, "ostree/deploy", deployment.stateroot, "var/lib/sbctl"
+            ),
+            sbctl_path,
         )
 
     update_loader_entries(sysroot)
     update_bootloader(sysroot, deployment=deployment)
+    if secureBoot:
+        sbctl_path = os.path.join(sysroot, "var/lib/sbctl")
+        execute("umount", sbctl_path)
+        shutil.rmtree(sbctl_path)
+
     deployment.chroot(
         shlex.join(["echo", f"root:{password}"]) + " | chpasswd",
-        sysroot=sysroot,
     )
 
     if not fastInstall:
