@@ -288,13 +288,14 @@ def command(args: Namespace) -> None:
         indent(
             [
                 "notifications:",
-                "  if: github.repository == 'Eeems/arkes' && github.actor != 'dependabot[bot]'",
+                "  if: github.repository == 'Eeems/arkes'",
                 "  name: Clear notifications",
                 "  runs-on: ubuntu-latest",
                 "  steps:",
                 "    - name: Checkout the repository",
                 "      uses: actions/checkout@v6",
                 "    - name: Clean cancellation notifications",
+                "      if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id) && github.repository == 'Eeems/arkes'",
                 "      uses: ./.github/actions/clean-cancelled-notifications",
                 "      with:",
                 "        pat: ${{ secrets.NOTIFICATION_PAT }}",
