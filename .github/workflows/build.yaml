@@ -95,7 +95,7 @@ jobs:
     needs: builder
     runs-on: ubuntu-latest
     outputs:
-      tag: ${{ needs.builder.outputs.unique_tag }}
+      tag: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id) && needs.builder.outputs.unique_tag || '' }}
     steps:
       - run: true
 
@@ -125,7 +125,7 @@ jobs:
       contents: read
       packages: read
     container:
-      image: quay.io/eeems/arkes-builder:${{ needs.builder_tag.outputs.tag || github.ref_name }}
+      image: quay.io/eeems/arkes-builder:${{ needs.builder_tag.outputs.tag }}
       options: >-
         --privileged
         --security-opt seccomp=unconfined
