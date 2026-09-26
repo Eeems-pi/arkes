@@ -46,6 +46,7 @@ RUN <<EOT
     python-progressbar \
     python-pyxattr \
     python-requests \
+    python-pipx \
     rsync \
     run-parts \
     sbctl \
