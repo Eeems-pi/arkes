@@ -316,7 +316,7 @@ def command(args: Namespace) -> None:
                 "  needs: builder",
                 "  runs-on: ubuntu-latest",
                 "  outputs:",
-                "    tag: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id) && needs.builder.outputs.unique_tag || '' }}",
+                "    tag: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id) && needs.builder.outputs.unique_tag || github.head_ref || github.ref_name }}",
                 "  steps:",
                 "    - run: true",
                 "",
