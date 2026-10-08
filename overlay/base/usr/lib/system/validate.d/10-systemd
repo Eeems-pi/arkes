@@ -5,13 +5,15 @@ if chronic systemctl is-system-running --wait; then
   exit 0
 fi
 
-# Work around bug in cosmic variant
-if systemctl is-failed systemd-vconsole-setup.service; then
-  sudo systemctl reset-failed systemd-vconsole-setup.service
-  if chronic systemctl is-system-running --wait; then
-    exit 0
+# Work around bug in nvidia template and cosmic variant
+for i in nvidia-cdi-refresh.path nvidia-cdi-refresh.service systemd-vconsole-setup.service; do
+  if systemctl is-failed "$i"; then
+    sudo systemctl reset-failed "$i"
+    if chronic systemctl is-system-running --wait; then
+      exit 0
+    fi
   fi
-fi
+done
 
 systemctl --failed --no-legend --no-pager --plain |
   while read -r unit _; do
