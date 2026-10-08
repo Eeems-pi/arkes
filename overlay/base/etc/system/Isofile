@@ -60,9 +60,10 @@ RUN <<EOT
   /usr/lib/system/post_build.d/95-build_kernel
   /usr/lib/system/create_live_bootloader
   /usr/lib/system/post_build.d/99-cleanup_kernel
-  systemctl disable \
-    atomic-state-overlay.service \
-    nvidia-cdi-refresh.service
+  systemctl disable atomic-state-overlay.service
+  if systemctl list-unit-files nvidia-cdi-refresh.service; then
+    systemctl disable nvidia-cdi-refresh.service
+  fi
   printf '%s\n' \
     "#!/bin/bash" \
     "mount -o remount,size=\$(awk '/^MemTotal:/{print int(\$2*0.7)}' /proc/meminfo)K /run/archiso/cowspace" \
