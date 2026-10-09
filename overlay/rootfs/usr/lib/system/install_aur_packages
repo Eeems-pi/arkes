@@ -34,7 +34,7 @@ for pkgref in "$@"; do
     --syncdeps \
     --install
   cd ..
-  chronic rm -r src
+  chronic rm -r /var/tmp/aur
 done
 
 chronic rm /etc/sudoers.d/aur
