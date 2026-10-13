@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+
+if chronic systemctl is-system-running --wait; then
+  echo "WARNING: systemd fix not needed for nvidia anymore" >&2
+  exit 0
+fi
+
+for i in nvidia-cdi-refresh.path nvidia-cdi-refresh.service; do
+  if systemctl is-failed "$i"; then
+    sudo systemctl reset-failed "$i"
+    if chronic systemctl is-system-running --wait; then
+      exit 0
+    fi
+  fi
+done

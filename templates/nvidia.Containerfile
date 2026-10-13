@@ -15,3 +15,5 @@ RUN /usr/lib/system/package_layer \
   nvidia-container-toolkit \
   nvidia-utils \
   nvidia-settings
+
+COPY overlay/nvidia /

@@ -26,6 +26,7 @@ concurrency:
 
 jobs:
   notifications:
+    if: (github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id) && github.repository == 'Eeems/arkes' && github.actor != 'dependabot[bot]'
     name: Clear notifications
     runs-on: ubuntu-latest
     steps:
@@ -102,7 +103,7 @@ jobs:
             ./make.py manifest $args
         env:
           TMPDIR: ${{ runner.temp }}
-          push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.repository == 'Eeems/arkes' && github.event_name != 'pull_request' }}
 
       - name: Save manifest cache
         if: ${{ inputs.cache }}

@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+if chronic systemctl is-system-running --wait; then
+  echo "WARNING: systemd fix not needed for cosmic anymore" >&2
+  exit 0
+fi
+
+if systemctl is-failed systemd-vconsole-setup.service; then
+  sudo systemctl reset-failed systemd-vconsole-setup.service
+  if chronic systemctl is-system-running --wait; then
+    exit 0
+  fi
+fi

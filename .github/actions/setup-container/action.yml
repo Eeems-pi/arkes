@@ -45,6 +45,7 @@ runs:
         REGISTRY_PASSWORD: ${{ inputs.password }}
 
     - name: Login to ${{ inputs.registry }}
+      if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.id == github.event.pull_request.base.repo.id }}
       uses: redhat-actions/podman-login@v2
       with:
         username: ${{ inputs.username }}
