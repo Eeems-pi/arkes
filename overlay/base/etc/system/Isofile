@@ -24,7 +24,6 @@ EOT
 # sections are separated by --add and should be alphabeically sorted inside those section
 RUN /usr/lib/system/package_layer \
   arch-install-scripts \
-  broadcom-wl-dkms \
   edk2-shell \
   grub \
   man-db \
