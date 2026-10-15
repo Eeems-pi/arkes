@@ -1,0 +1,89 @@
+ARG BASE_IMAGE=arkes:base
+
+FROM ${BASE_IMAGE}
+
+ARG UUID
+
+RUN <<EOT
+  set -e
+  rm /home
+  mkdir /home
+  /usr/lib/system/setup_live_user
+  mkdir -p /etc/mkinitcpio{,.conf}.d
+  cp -lf \
+    /etc/system/mkinitcpio-archiso.conf \
+    /etc/mkinitcpio.conf.d/archiso.conf
+  cp -lf \
+    /etc/system/linux-zen-archiso.preset \
+    /etc/mkinitcpio.d/linux-zen.preset
+EOT
+
+# Base tools needed for installation
+# All the possible filesystems
+# All the possible microcode
+# sections are separated by --add and should be alphabeically sorted inside those section
+RUN /usr/lib/system/package_layer \
+  arch-install-scripts \
+  broadcom-wl-dkms \
+  edk2-shell \
+  grub \
+  man-db \
+  man-pages \
+  memtest86+ \
+  memtest86+-efi \
+  mkinitcpio-archiso \
+  mtools \
+  qemu-guest-agent \
+  syslinux \
+  --add \
+  apfsprogs \
+  bcachefs-dkms \
+  bcachefs-tools \
+  btrfs-progs \
+  dosfstools \
+  e2fsprogs \
+  exfatprogs \
+  f2fs-tools \
+  jfsutils \
+  linux-apfs-rw-dkms \
+  mtd-utils \
+  nilfs-utils \
+  ntfs-3g \
+  udftools \
+  xfsprogs \
+  --add \
+  amd-ucode \
+  intel-ucode
+
+RUN <<EOT
+  set -e
+  sed -i '/11-dm-initramfs.rules/d' /usr/lib/initcpio/install/archiso
+  /usr/lib/system/post_build.d/95-build_kernel
+  /usr/lib/system/create_live_bootloader
+  /usr/lib/system/post_build.d/99-cleanup_kernel
+  systemctl disable atomic-state-overlay.service
+  printf '%s\n' \
+    "#!/bin/bash" \
+    "mount -o remount,size=\$(awk '/^MemTotal:/{print int(\$2*0.7)}' /proc/meminfo)K /run/archiso/cowspace" \
+  > /bin/resize-cowspace
+  chmod +x /bin/resize-cowspace
+  printf '%s\n' \
+    "[Unit]" \
+    "After=local-fs.target" \
+    "[Service]" \
+    "ExecStart=/bin/resize-cowspace" \
+    "RemainAfterExit=true" \
+    "Type=oneshot" \
+    "[Install]" \
+    "WantedBy=multi-user.target" \
+  > /etc/systemd/system/resize-cowspace.service
+  systemctl enable \
+    resize-cowspace.service \
+    serial-getty@ttyS0.service
+EOT
+
+# Fix buildah bug
+RUN <<EOT
+  set -e
+  sed -i 's|^#mount_program = "/usr/bin/fuse-overlayfs"|mount_program = "/usr/bin/fuse-overlayfs"|' /etc/containers/storage.conf
+EOT
