@@ -38,6 +38,7 @@ RUN /usr/lib/system/package_layer \
   apfsprogs \
   bcachefs-dkms \
   bcachefs-tools \
+  broadcom-wl-dkms \
   btrfs-progs \
   dosfstools \
   e2fsprogs \
