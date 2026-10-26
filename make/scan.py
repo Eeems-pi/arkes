@@ -39,11 +39,13 @@ def command(args: Namespace) -> None:
     if in_ci:
         volumes.append("./markdown.tpl:/template.tpl")
 
-    script = """
+    ret = in_system(
+        "-c",
+        f"""
         set -e
         /usr/lib/system/initialize_pacman
         /usr/lib/system/install_packages trivy
-        if [[ "{ci_flag}" == "" ]]; then
+        if [[ "{"x" if in_ci else ""}" == "" ]]; then
             trivy rootfs \
                 --cache-dir /trivy \
                 --skip-dirs=/ostree \
@@ -84,11 +86,7 @@ def command(args: Namespace) -> None:
                 --format table \
                 /trivy/report.json
         fi
-        """
-
-    ret = in_system(
-        "-c",
-        script,
+        """,
         target=f"{REPO}:{cast(str, args.target)}",
         entrypoint="/bin/bash",
         volumes=volumes,
