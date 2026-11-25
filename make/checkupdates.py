@@ -14,6 +14,8 @@ from typing import (
 )
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 from . import (
     REPO,
@@ -88,10 +90,24 @@ def command(args: Namespace) -> None:
         if current != new:
             found_count = 0
             repos = ("core", "extra", "multilib")
+            session = requests.Session()
+            retry_strategy = Retry(
+                total=3,
+                backoff_factor=2,
+                status_forcelist=[429, 500, 502, 503, 504],
+                allowed_methods=["HEAD", "GET", "OPTIONS"],
+            )
+            adapter = HTTPAdapter(max_retries=retry_strategy)
+            session.mount("https://", adapter)
+            session.mount("http://", adapter)
             for repo in repos:
                 # TODO make arch dynamic instead of hardcoded when more than x86_64 is added
                 url = f"{m.group(1)}/{new}/{repo}/os/x86_64/{repo}.db"
-                res = requests.head(url, timeout=20)
+                try:
+                    res = session.head(url, timeout=20)
+                except requests.RequestException as e:
+                    print(f"Failed to check {repo}: {e}")
+                    sys.exit(1)
                 if res.status_code == 200:
                     found_count += 1
 
